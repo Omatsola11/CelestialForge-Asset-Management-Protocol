@@ -167,3 +167,106 @@
   )
 )
 
+;; Secure sovereignty transfer protocol with comprehensive validation mechanisms
+(define-public (execute-sovereignty-transition (asset-unique-identifier uint) (designated-successor-sovereign principal))
+  (let
+    (
+      (existing-asset-registry-entry (unwrap! (map-get? stellar-asset-repository { asset-unique-identifier: asset-unique-identifier })
+        asset-not-found-exception))
+    )
+    ;; Rigorous sovereignty verification before transition execution
+    (asserts! (confirm-asset-repository-presence asset-unique-identifier) asset-not-found-exception)
+    (asserts! (is-eq (get asset-sovereign existing-asset-registry-entry) tx-sender) proprietorship-conflict-exception)
+
+    ;; Execute secure sovereignty transition with updated sovereign information
+    (map-set stellar-asset-repository
+      { asset-unique-identifier: asset-unique-identifier }
+      (merge existing-asset-registry-entry { asset-sovereign: designated-successor-sovereign })
+    )
+    (ok true)
+  )
+)
+
+;; Permanent asset elimination from stellar repository with security protocols
+(define-public (eliminate-stellar-asset (asset-unique-identifier uint))
+  (let
+    (
+      (targeted-asset-registry-entry (unwrap! (map-get? stellar-asset-repository { asset-unique-identifier: asset-unique-identifier })
+        asset-not-found-exception))
+    )
+    ;; Comprehensive sovereignty validation before irreversible elimination
+    (asserts! (confirm-asset-repository-presence asset-unique-identifier) asset-not-found-exception)
+    (asserts! (is-eq (get asset-sovereign targeted-asset-registry-entry) tx-sender) proprietorship-conflict-exception)
+
+    ;; Execute irreversible asset elimination from stellar repository
+    (map-delete stellar-asset-repository { asset-unique-identifier: asset-unique-identifier })
+    (ok true)
+  )
+)
+
+;; ===== Advanced read-only data retrieval and information access functions =====
+
+;; Comprehensive asset information retrieval with access governance validation
+(define-read-only (retrieve-stellar-asset-intelligence (asset-unique-identifier uint))
+  (let
+    (
+      (asset-registry-entry (unwrap! (map-get? stellar-asset-repository { asset-unique-identifier: asset-unique-identifier })
+        asset-not-found-exception))
+      (access-authorization (default-to false
+        (get access-authorization-status
+          (map-get? forge-permission-governance { asset-unique-identifier: asset-unique-identifier, querying-entity: tx-sender })
+        )
+      ))
+    )
+    ;; Verify access authorization before comprehensive data retrieval
+    (asserts! (confirm-asset-repository-presence asset-unique-identifier) asset-not-found-exception)
+    (asserts! (or access-authorization (is-eq (get asset-sovereign asset-registry-entry) tx-sender)) access-restriction-exception)
+
+    ;; Return comprehensive asset intelligence information
+    (ok {
+      digital-asset-designation: (get digital-asset-designation asset-registry-entry),
+      asset-sovereign: (get asset-sovereign asset-registry-entry),
+      computational-payload-magnitude: (get computational-payload-magnitude asset-registry-entry),
+      chronological-registration-marker: (get chronological-registration-marker asset-registry-entry),
+      comprehensive-attribute-schema: (get comprehensive-attribute-schema asset-registry-entry),
+      taxonomy-descriptor-array: (get taxonomy-descriptor-array asset-registry-entry)
+    })
+  )
+)
+
+;; Global forge infrastructure statistics retrieval mechanism
+(define-read-only (get-forge-infrastructure-metrics)
+  (ok {
+    total-registered-assets: (var-get celestial-forge-counter),
+    forge-supreme-authority: forge-supreme-authority
+  })
+)
+
+;; Asset sovereignty verification utility function
+(define-read-only (verify-asset-sovereign-identity (asset-unique-identifier uint))
+  (match (map-get? stellar-asset-repository { asset-unique-identifier: asset-unique-identifier })
+    asset-registry-entry (ok (get asset-sovereign asset-registry-entry))
+    asset-not-found-exception
+  )
+)
+
+;; Access authorization status verification and analysis
+(define-read-only (analyze-access-authorization-status (asset-unique-identifier uint) (querying-entity principal))
+  (let
+    (
+      (asset-registry-entry (unwrap! (map-get? stellar-asset-repository { asset-unique-identifier: asset-unique-identifier })
+        asset-not-found-exception))
+      (explicit-authorization (default-to false
+        (get access-authorization-status
+          (map-get? forge-permission-governance { asset-unique-identifier: asset-unique-identifier, querying-entity: querying-entity })
+        )
+      ))
+    )
+    ;; Return comprehensive authorization status intelligence
+    (ok {
+      has-explicit-authorization: explicit-authorization,
+      is-asset-sovereign: (is-eq (get asset-sovereign asset-registry-entry) querying-entity),
+      can-access-asset: (or explicit-authorization (is-eq (get asset-sovereign asset-registry-entry) querying-entity))
+    })
+  )
+)
